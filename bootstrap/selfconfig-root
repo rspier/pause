@@ -136,7 +136,9 @@ require Path::Tiny;
 
 # Partitioning!
 
-run_cmd(qw(mkdir -p /data/mysql /data/pause/{pub,incoming,tmp}));
+run_cmd(qw(mkdir -p /data/mysql /data/pause/pub));
+run_cmd(qw(mkdir -p /data/mysql /data/pause/incoming));
+run_cmd(qw(mkdir -p /data/mysql /data/pause/tmp));
 if (-e "/usr/sbin/lvcreate" && $opt->volume_group) {
   my $vg = $opt->volume_group;
   run_cmd(qw(lvcreate -L4G),  qq($vg), qw(-n mysql));
