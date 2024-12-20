@@ -11,7 +11,7 @@ sub startup {
 
   $app->moniker("pause-web");
 
-  $app->max_request_size(0); # indefinite upload size
+  $app->max_request_size(10485760); # 10MB upload size limit
 
   # Set the same logger as the one Plack uses
   # (initialized in app.psgi)

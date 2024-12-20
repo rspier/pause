@@ -293,4 +293,42 @@ subtest 'post: to the site top, as various CPAN uploaders do/did' => sub {
     }
 };
 
+subtest 'post: upload size limit' => sub {
+    my $small_file = "$Test::PAUSE::Web::AppRoot/t/data/files/somefile.txt";
+    my $large_file = "$Test::PAUSE::Web::AppRoot/t/dist/My-Dist.yaml";
+    my $max_size = 10485760;
+
+    my $test_upload = sub {
+        my ($user, $file, $expected_status) = @_;
+        my $t = Test::PAUSE::Web->new(user => $user);
+        my %form = (
+            pause99_add_uri_httpupload => [$file, path($file)->basename],
+            SUBMIT_pause99_add_uri_httpupload => 1,
+        );
+
+        $t->mod_dbh->do('TRUNCATE uris');
+        my $res = $t->post("/pause/authenquery?ACTION=add_uri", \%form, "Content-Type" => "form-data");
+
+        if ($expected_status == 200) {
+            $t->status_is($expected_status);
+            my $uploaded_file = $PAUSE::Config->{INCOMING_LOC} . "/" . path($file)->basename;
+            ok -f $uploaded_file, "uploaded file exists";
+            unlink $uploaded_file;
+        } else {
+            $t->status_is($expected_status);
+            $t->text_like('.error_message' => qr/Upload size exceeds limit/);
+        }
+    };
+
+    $test_upload->('ANDK', $small_file, 200);
+    $test_upload->('ANDK', $large_file, 406);
+
+
+
+    $test_upload->('UPLOADSIZE', $large_file, 200);
+    $test_upload->('PUMPKIN', $large_file, 200);
+};
+
+
 done_testing;
+
