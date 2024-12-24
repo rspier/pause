@@ -113,12 +113,11 @@ sub reset_fixture {
   # test fixture
   { # authen_pause.usertable
     $self->authen_dbh->do(qq{TRUNCATE usertable});
-    for my $user ("TESTUSER", "TESTUSER2", "TESTUSER3", "TESTUSER4", "TESTADMIN", "TESTCNSRD", "UPLOADSIZE", "PUMPKIN") {
+    for my $user ("TESTUSER", "TESTUSER2", "TESTUSER3", "TESTUSER4", "TESTADMIN", "TESTCNSRD") {
       $self->authen_db->insert('usertable', {
         user => $user,
         password => PAUSE::Crypt::hash_password("test"),
         secretemail => lc($user) . '@localhost',
-        groups => ($user eq 'UPLOADSIZE' ? 'large_uploads' : ($user eq 'PUMPKIN' ? 'pumpking' : '')),
       });
       my $user_dir = join "/", $PAUSE::Config->{MLROOT}, PAUSE::user2dir($user);
       path($user_dir)->mkpath;

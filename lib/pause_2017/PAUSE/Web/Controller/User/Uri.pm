@@ -5,6 +5,8 @@ use Mojo::ByteStream;
 use Mojo::URL;
 use File::pushd;
 
+my $MAX_UPLOAD_SIZE = 50*1024*1024;
+
 sub add {
   my $c = shift;
   my $pause = $c->stash(".pause");
@@ -59,10 +61,8 @@ sub add {
           $upl = $req->upload("HTTPUPLOAD")
          ) {
         if ($upl->size) {
-          my $max_size = $c->app->max_request_size;
-          my $user_groups = $pause->{UserSecrets}{groups} || "";
-          if ($upl->size > $max_size && !($user_groups =~ /large_uploads|pumpking/)) {
-            die PAUSE::Web::Exception->new(ERROR => "Upload size exceeds limit ($max_size bytes).");
+          if ($upl->size > $MAX_UPLOAD_SIZE) {
+            die PAUSE::Web::Exception->new(ERROR => "Upload size exceeds limit ($MAX_UPLOAD_SIZE bytes).");
           }
           my $filename = $upl->filename;
           $filename =~ s(.*/)()gs;      # no slash
